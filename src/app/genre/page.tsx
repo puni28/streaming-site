@@ -17,7 +17,7 @@ if (!API_KEY) {
 export default function GenrePage() {
   const [genres, setGenres] = useState<Genre[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [error] = useState("");
 
   useEffect(() => {
     async function fetchGenres() {

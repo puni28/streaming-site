@@ -19,13 +19,12 @@ if (!API_KEY) {
 export default function MoviesPage() {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [error] = useState("");
 
   useEffect(() => {
     async function fetchMovies() {
       if (!API_KEY) {
         console.error("TMDB API Key not found");
-        setError("Missing API key. Please check your environment variables.");
         return;
       }
 

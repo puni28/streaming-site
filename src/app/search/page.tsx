@@ -31,7 +31,7 @@ export default function SearchResults() {
   const [tvShows, setTvShows] = useState<MediaItem[]>([]);
   const [anime, setAnime] = useState<AnimeItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [error ] = useState("");
 
   useEffect(() => {
     if (!query) return;
@@ -39,7 +39,6 @@ export default function SearchResults() {
     async function fetchResults() {
       if (!TMDB_API_KEY) {
         console.error("TMDB API Key not found");
-        setError("Missing API key. Please check your environment variables.");
         return;
       }
 
