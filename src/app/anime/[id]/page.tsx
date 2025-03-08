@@ -38,10 +38,14 @@ export default function AnimeDetails() {
         const data: Anime = await res.json();
         setAnime(data);
         setEpisodes(data.episodesList || []);
-      } catch (error: any) {
-        console.error("Error fetching anime details:", error);
-        setError(error.message);
-      } finally {
+      } catch (err) {
+        if (err instanceof Error) {
+          console.error("Error fetching data:", err.message);
+        } else {
+          console.error("Unknown error occurred:", err);
+        }
+      }
+       finally {
         setLoading(false);
       }
     }

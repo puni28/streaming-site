@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { FaSearch, FaUser, FaFilm, FaTv, FaThList, FaHome, FaDragon } from "react-icons/fa";
+import { FaSearch, FaUser, FaFilm, FaTv, FaHome, FaDragon } from "react-icons/fa";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 

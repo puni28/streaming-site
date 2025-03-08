@@ -38,10 +38,14 @@ export default function TVShowsPage() {
 
         const data = await res.json();
         setTvShows(data.results || []);
-      } catch (err: any) {
-        console.error("Error fetching TV shows:", err);
-        setError("Failed to fetch popular TV shows.");
-      } finally {
+      } catch (err) {
+        if (err instanceof Error) {
+          console.error("Error fetching data:", err.message);
+        } else {
+          console.error("Unknown error occurred:", err);
+        }
+      }
+       finally {
         setLoading(false);
       }
     }

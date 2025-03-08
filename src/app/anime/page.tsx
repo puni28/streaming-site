@@ -43,9 +43,14 @@ export default function AnimePage() {
           setAnime(data);
           success = true;
           break; // Stop trying other URLs if one works
-        } catch (err: any) {
-          console.error(`Error fetching from ${url}:`, err.message);
-        }
+        } catch (err) {
+            if (err instanceof Error) {
+              console.error("Error fetching data:", err.message);
+            } else {
+              console.error("Unknown error occurred:", err);
+            }
+          }
+          
       }
 
       if (!success) {

@@ -41,10 +41,14 @@ export default function HomePage() {
 
         setMovies(movieData.results || []);
         setTvShows(tvData.results || []);
-      } catch (err: any) {
-        console.error("Error fetching movies and TV shows:", err);
-        setError("Failed to fetch trending movies and TV shows.");
-      } finally {
+      } catch (err) {
+        if (err instanceof Error) {
+          console.error("Error fetching data:", err.message);
+        } else {
+          console.error("Unknown error occurred:", err);
+        }
+      }
+       finally {
         setLoading(false);
       }
     }

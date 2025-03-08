@@ -17,9 +17,14 @@ export default function TvDetails() {
         const res = await fetch(`https://api.themoviedb.org/3/tv/${id}?api_key=${API_KEY}`);
         const data = await res.json();
         setShow(data);
-      } catch (error) {
-        console.error("Error fetching TV show details:", error);
+      } catch (err) {
+        if (err instanceof Error) {
+          console.error("Error fetching data:", err.message);
+        } else {
+          console.error("Unknown error occurred:", err);
+        }
       }
+      
     }
     fetchTvDetails();
   }, [id]);

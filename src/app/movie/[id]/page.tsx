@@ -17,9 +17,14 @@ export default function MovieDetails() {
         const res = await fetch(`https://api.themoviedb.org/3/movie/${id}?api_key=${API_KEY}`);
         const data = await res.json();
         setMovie(data);
-      } catch (error) {
-        console.error("Error fetching movie details:", error);
+      } catch (err) {
+        if (err instanceof Error) {
+          console.error("Error fetching data:", err.message);
+        } else {
+          console.error("Unknown error occurred:", err);
+        }
       }
+      
     }
     fetchMovieDetails();
   }, [id]);

@@ -32,10 +32,14 @@ export default function GenrePage() {
         if (!data.genres) throw new Error("No genres found!");
 
         setGenres(data.genres);
-      } catch (error: any) {
-        console.error("Error fetching genres:", error);
-        setError("Failed to load genres. Try again later.");
-      } finally {
+      } catch (err) {
+        if (err instanceof Error) {
+          console.error("Error fetching data:", err.message);
+        } else {
+          console.error("Unknown error occurred:", err);
+        }
+      }
+       finally {
         setLoading(false);
       }
     }

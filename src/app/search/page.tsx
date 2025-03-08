@@ -65,10 +65,14 @@ export default function SearchResults() {
         setMovies(movieData.results || []);
         setTvShows(tvData.results || []);
         setAnime(animeData.results || []);
-      } catch (err: any) {
-        console.error("Error fetching search results:", err);
-        setError("Failed to fetch search results.");
-      } finally {
+      } catch (err) {
+        if (err instanceof Error) {
+          console.error("Error fetching data:", err.message);
+        } else {
+          console.error("Unknown error occurred:", err);
+        }
+      }
+       finally {
         setLoading(false);
       }
     }
@@ -81,7 +85,7 @@ export default function SearchResults() {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white p-6">
-      <h2 className="text-3xl font-bold mb-6">Search Results for "{query}"</h2>
+<h2 className="text-3xl font-bold mb-6">Search Results for &quot;{query}&quot;</h2>
 
       {/* Movies Section */}
       <h3 className="text-2xl font-semibold mt-6">Movies</h3>
