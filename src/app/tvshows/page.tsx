@@ -4,24 +4,53 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
+interface TVShow {
+  id: number;
+  name: string;
+  poster_path: string;
+}
+
 const API_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY;
 
+if (!API_KEY) {
+  console.error("Missing TMDB API Key! Make sure NEXT_PUBLIC_TMDB_API_KEY is set in your .env file.");
+}
+
 export default function TVShowsPage() {
-  const [tvShows, setTvShows] = useState([]);
+  const [tvShows, setTvShows] = useState<TVShow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     async function fetchTVShows() {
+      if (!API_KEY) {
+        console.error("TMDB API Key not found");
+        setError("Missing API key. Please check your environment variables.");
+        return;
+      }
+
       try {
         const res = await fetch(`https://api.themoviedb.org/3/tv/popular?api_key=${API_KEY}`);
+
+        if (!res.ok) {
+          throw new Error(`API request failed: ${res.status} ${res.statusText}`);
+        }
+
         const data = await res.json();
-        setTvShows(data.results);
-      } catch (error) {
-        console.error("Error fetching TV shows:", error);
+        setTvShows(data.results || []);
+      } catch (err: any) {
+        console.error("Error fetching TV shows:", err);
+        setError("Failed to fetch popular TV shows.");
+      } finally {
+        setLoading(false);
       }
     }
 
     fetchTVShows();
   }, []);
+
+  if (loading) return <p className="text-center text-white">Loading TV shows...</p>;
+  if (error) return <p className="text-center text-red-500">{error}</p>;
 
   return (
     <div className="min-h-screen bg-gray-900 text-white p-6">

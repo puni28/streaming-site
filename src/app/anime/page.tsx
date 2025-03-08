@@ -4,8 +4,15 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
+interface Anime {
+  animeId: string;
+  animeTitle: string;
+  animeImg: string;
+  episodeId: string;
+}
+
 export default function AnimePage() {
-  const [anime, setAnime] = useState([]);
+  const [anime, setAnime] = useState<Anime[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -26,7 +33,7 @@ export default function AnimePage() {
             throw new Error(`API request failed: ${res.status} ${res.statusText}`);
           }
 
-          const data = await res.json();
+          const data: Anime[] = await res.json();
           console.log("API Response:", data);
 
           if (!data || data.length === 0) {
@@ -57,8 +64,8 @@ export default function AnimePage() {
     <div className="min-h-screen bg-gray-900 text-white p-6">
       <h2 className="text-3xl font-bold mb-6">Trending Anime</h2>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-        {anime.map((item, index) => (
-          <Link href={`/anime/${item.animeId}`} key={index}>
+        {anime.map((item) => (
+          <Link href={`/anime/${item.animeId}`} key={item.animeId}>
             <div className="bg-gray-800 p-2 rounded-lg cursor-pointer hover:scale-105 transition-transform">
               <Image
                 src={item.animeImg}

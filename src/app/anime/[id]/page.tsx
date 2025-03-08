@@ -5,25 +5,39 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 
+interface Episode {
+  episodeId: string;
+  episodeNum: number;
+}
+
+interface Anime {
+  animeTitle: string;
+  animeImg: string;
+  synopsis: string;
+  episodesList: Episode[];
+}
+
 export default function AnimeDetails() {
-  const { id } = useParams(); // Get anime ID from URL
-  const [anime, setAnime] = useState<any>(null);
-  const [episodes, setEpisodes] = useState([]);
+  const { id } = useParams();
+  const animeId = Array.isArray(id) ? id[0] : id; // Ensure it's a string
+
+  const [anime, setAnime] = useState<Anime | null>(null);
+  const [episodes, setEpisodes] = useState<Episode[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
     async function fetchAnimeDetails() {
       try {
-        const res = await fetch(`https://gogoanime.consumet.stream/anime-details/${id}`);
+        const res = await fetch(`https://gogoanime.consumet.stream/anime-details/${animeId}`);
 
         if (!res.ok) {
           throw new Error(`API request failed: ${res.status} ${res.statusText}`);
         }
 
-        const data = await res.json();
+        const data: Anime = await res.json();
         setAnime(data);
-        setEpisodes(data.episodesList);
+        setEpisodes(data.episodesList || []);
       } catch (error: any) {
         console.error("Error fetching anime details:", error);
         setError(error.message);
@@ -32,10 +46,10 @@ export default function AnimeDetails() {
       }
     }
 
-    if (id) {
+    if (animeId) {
       fetchAnimeDetails();
     }
-  }, [id]);
+  }, [animeId]);
 
   if (loading) return <p className="text-center text-white">Loading anime details...</p>;
   if (error) return <p className="text-center text-red-500">Error: {error}</p>;
@@ -57,7 +71,7 @@ export default function AnimeDetails() {
       <h2 className="text-2xl font-bold mt-6">Episodes</h2>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-4">
         {episodes.map((ep) => (
-          <Link href={`/anime/${id}/watch/${ep.episodeId}`} key={ep.episodeId}>
+          <Link href={`/anime/${animeId}/watch/${ep.episodeId}`} key={ep.episodeId}>
             <div className="bg-gray-800 p-2 rounded-lg cursor-pointer hover:scale-105 transition-transform text-center">
               Episode {ep.episodeNum}
             </div>

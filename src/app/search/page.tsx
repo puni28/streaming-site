@@ -5,55 +5,79 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 
+interface MediaItem {
+  id: number;
+  title?: string;
+  name?: string;
+  poster_path: string;
+}
+
+interface AnimeItem {
+  id: string;
+  title: string;
+  image: string;
+}
+
 const TMDB_API_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY;
+
+if (!TMDB_API_KEY) {
+  console.error("Missing TMDB API Key! Make sure NEXT_PUBLIC_TMDB_API_KEY is set in your .env file.");
+}
 
 export default function SearchResults() {
   const searchParams = useSearchParams();
   const query = searchParams.get("q");
-  const [movies, setMovies] = useState([]);
-  const [tvShows, setTvShows] = useState([]);
-  const [anime, setAnime] = useState([]);
+  const [movies, setMovies] = useState<MediaItem[]>([]);
+  const [tvShows, setTvShows] = useState<MediaItem[]>([]);
+  const [anime, setAnime] = useState<AnimeItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (!query) return;
 
     async function fetchResults() {
+      if (!TMDB_API_KEY) {
+        console.error("TMDB API Key not found");
+        setError("Missing API key. Please check your environment variables.");
+        return;
+      }
+
       setLoading(true);
 
       try {
-        // Fetch Movies
-        const movieRes = await fetch(
-          `https://api.themoviedb.org/3/search/movie?api_key=${TMDB_API_KEY}&query=${query}`
-        );
-        const movieData = await movieRes.json();
+        const [movieRes, tvRes, animeRes] = await Promise.all([
+          fetch(`https://api.themoviedb.org/3/search/movie?api_key=${TMDB_API_KEY}&query=${query}`),
+          fetch(`https://api.themoviedb.org/3/search/tv?api_key=${TMDB_API_KEY}&query=${query}`),
+          fetch(`https://api.consumet.org/anime/gogoanime/search?keyw=${query}`)
+        ]);
+
+        if (!movieRes.ok || !tvRes.ok || !animeRes.ok) {
+          throw new Error(`API request failed`);
+        }
+
+        const [movieData, tvData, animeData] = await Promise.all([
+          movieRes.json(),
+          tvRes.json(),
+          animeRes.json()
+        ]);
+
         setMovies(movieData.results || []);
-
-        // Fetch TV Shows
-        const tvRes = await fetch(
-          `https://api.themoviedb.org/3/search/tv?api_key=${TMDB_API_KEY}&query=${query}`
-        );
-        const tvData = await tvRes.json();
         setTvShows(tvData.results || []);
-
-        // Fetch Anime (GoGoAnime API)
-        const animeRes = await fetch(
-          `https://api.consumet.org/anime/gogoanime/${query}`
-        );
-        const animeData = await animeRes.json();
         setAnime(animeData.results || []);
-
-      } catch (error) {
-        console.error("Error fetching search results:", error);
+      } catch (err: any) {
+        console.error("Error fetching search results:", err);
+        setError("Failed to fetch search results.");
+      } finally {
+        setLoading(false);
       }
-
-      setLoading(false);
     }
 
     fetchResults();
   }, [query]);
 
   if (loading) return <p className="text-center text-white">Searching...</p>;
+  if (error) return <p className="text-center text-red-500">{error}</p>;
 
   return (
     <div className="min-h-screen bg-gray-900 text-white p-6">
@@ -67,7 +91,7 @@ export default function SearchResults() {
             <div className="bg-gray-800 p-2 rounded-lg cursor-pointer hover:scale-105 transition-transform">
               <Image
                 src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-                alt={movie.title}
+                alt={movie.title || "Movie Poster"}
                 width={200}
                 height={300}
                 className="rounded-md"
@@ -86,7 +110,7 @@ export default function SearchResults() {
             <div className="bg-gray-800 p-2 rounded-lg cursor-pointer hover:scale-105 transition-transform">
               <Image
                 src={`https://image.tmdb.org/t/p/w500${show.poster_path}`}
-                alt={show.name}
+                alt={show.name || "TV Show Poster"}
                 width={200}
                 height={300}
                 className="rounded-md"
@@ -100,8 +124,8 @@ export default function SearchResults() {
       {/* Anime Section */}
       <h3 className="text-2xl font-semibold mt-6">Anime</h3>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-        {anime.map((item, index) => (
-          <Link href={`/anime/${item.id}`} key={index}>
+        {anime.map((item) => (
+          <Link href={`/anime/${item.id}`} key={item.id}>
             <div className="bg-gray-800 p-2 rounded-lg cursor-pointer hover:scale-105 transition-transform">
               <Image
                 src={item.image}
@@ -118,4 +142,3 @@ export default function SearchResults() {
     </div>
   );
 }
-
